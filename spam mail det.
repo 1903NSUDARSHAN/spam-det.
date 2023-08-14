@@ -1,1 +1,70 @@
+# IMPORT STATEMENTS
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+
+# DATA COLLECTION AND PRE-PROCESSING
+
+raw_mail_data=pd.read_csv('/content/mail_data.csv')
+print(raw_mail_data)  # output that prints the data set loaded
+
+mail_data=raw_mail_data.where((pd.notnull(raw_mail_data)),'')
+mail_data.head()  # Gives an organized view 
+
+# LABEL ENCODING
+ 
+mail_data.loc[mail_data['Category']=='spam','Category',]=0
+mail_data.loc[mail_data['Category']=='ham','Category',]=1
+mail_data.head()  # displayes the labelled organized dataset
+
+# SEPERATING THE DATA AS TEXT AND LABELS
+
+X = mail_data['Message']
+Y = mail_data['Category']
+print(X)  # displays only the messsage part with s.no
+print(Y)  # displays only the category part with s.no
+
+# SPLIT THE DATASET AS TRAINING DATA AND TEST DATA
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=3)
+print(X_train.shape)
+print(X_test.shape)  # gives the size as number of individual data assigned
+
+#  FEATURE EXTRACTION OR TEXT TO NUMERIC CONVERSION
+
+feature_extraction = TfidfVectorizer(min_df = 1, stop_words = 'english', lowercase =True)
+X_train_features = feature_extraction.fit_transform(X_train)
+X_test_features = feature_extraction.transform(X_test)
+Y_train = Y_train.astype('int')
+Y_test = Y_test.astype('int')
+
+# TRAINING THE MODEL USING LOGISTIC REGRESSION
+
+model = LogisticRegression()
+model.fit(X_train_features, Y_train)
+
+# EVALUATING THE TRAINED MODEL
+
+prediction_on_training_data = model.predict(X_train_features)
+accuracy = accuracy_score(Y_train, prediction_on_training_data)
+print(accuracy)  # prints the accuracy of training data
+prediction_on_test_data = model.predict(X_test_features)
+accuracy_test= accuracy_score(Y_test, prediction_on_test_data)
+print(accuracy_test)  # prints the accuracy of testing data
+
+# BUILDING A PREDICTIVE SYSTEM
+
+input_mail = ["I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today.	I'm gonna be home soon and i don't want to talk about this stuff anymore tonight, k? I've cried enough today."
+]
+input_data_features = feature_extraction.transform(input_mail)
+pred = model.predict(input_data_features)
+print(pred)
+if(pred[0]==1):
+  print("Ham mail")
+else:
+  print("Spam mail")
 
